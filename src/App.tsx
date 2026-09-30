@@ -1,28 +1,75 @@
 import 'bulma/css/bulma.css';
 import '@fortawesome/fontawesome-free/css/all.css';
 import './App.scss';
+
 import {
-  Routes,
-  Route,
+  Link,
   Navigate,
   NavLink,
-  Link,
+  Route,
+  Routes,
   useParams,
 } from 'react-router-dom';
 
-const tabs = [
-  { id: 'tab-1', title: 'Tab 1', content: 'Some text 1' },
-  { id: 'tab-2', title: 'Tab 2', content: 'Some text 2' },
-  { id: 'tab-3', title: 'Tab 3', content: 'Some text 3' },
+import { Tab } from './types/Tab';
+
+const tabs: Tab[] = [
+  {
+    id: 'tab-1',
+    title: 'Tab 1',
+    content: 'Some text 1',
+  },
+  {
+    id: 'tab-2',
+    title: 'Tab 2',
+    content: 'Some text 2',
+  },
+  {
+    id: 'tab-3',
+    title: 'Tab 3',
+    content: 'Some text 3',
+  },
 ];
 
-// --- Page Components ---
+export const Navigation = () => {
+  return (
+    <nav
+      className="navbar is-light is-fixed-top is-mobile has-shadow"
+      data-cy="Nav"
+    >
+      <div className="container">
+        <div className="navbar-brand">
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              `navbar-item ${isActive ? 'is-active' : ''}`
+            }
+          >
+            Home
+          </NavLink>
 
-const HomePage = () => <h1 className="title">Home page</h1>;
+          <NavLink
+            to="/tabs"
+            className={({ isActive }) =>
+              `navbar-item ${isActive ? 'is-active' : ''}`
+            }
+          >
+            Tabs
+          </NavLink>
+        </div>
+      </div>
+    </nav>
+  );
+};
 
-const TabsPage = () => {
+export const HomePage = () => {
+  return <h1 className="title">Home page</h1>;
+};
+
+export const TabsPage = () => {
   const { tabId } = useParams();
-  const activeTab = tabs.find(tab => tab.id === tabId);
+
+  const selectedTab = tabs.find(tab => tab.id === tabId);
 
   return (
     <>
@@ -34,7 +81,7 @@ const TabsPage = () => {
             <li
               key={tab.id}
               data-cy="Tab"
-              className={tabId === tab.id ? 'is-active' : ''}
+              className={selectedTab?.id === tab.id ? 'is-active' : ''}
             >
               <Link to={`/tabs/${tab.id}`}>{tab.title}</Link>
             </li>
@@ -43,62 +90,37 @@ const TabsPage = () => {
       </div>
 
       <div className="block" data-cy="TabContent">
-        {activeTab ? activeTab.content : 'Please select a tab'}
+        {selectedTab ? selectedTab.content : 'Please select a tab'}
       </div>
     </>
   );
 };
 
-const NotFoundPage = () => <h1 className="title">Page not found</h1>;
+export const NotFoundPage = () => {
+  return <h1 className="title">Page not found</h1>;
+};
 
-// --- Main App Component ---
+export const App = () => {
+  return (
+    <>
+      <Navigation />
 
-export const App = () => (
-  <>
-    {/* Also requires <html class="has-navbar-fixed-top"> */}
-    <nav
-      className="navbar is-light is-fixed-top is-mobile has-shadow"
-      data-cy="Nav"
-    >
-      <div className="container">
-        <div className="navbar-brand">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `navbar-item${isActive ? ' is-active' : ''}`
-            }
-          >
-            Home
-          </NavLink>
-          <NavLink
-            to="/tabs"
-            className={({ isActive }) =>
-              `navbar-item${isActive ? ' is-active' : ''}`
-            }
-          >
-            Tabs
-          </NavLink>
+      <div className="section">
+        <div className="container">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+
+            <Route path="tabs">
+              <Route index element={<TabsPage />} />
+              <Route path=":tabId" element={<TabsPage />} />
+            </Route>
+
+            <Route path="/home" element={<Navigate to="/" replace />} />
+
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
         </div>
       </div>
-    </nav>
-
-    <div className="section">
-      <div className="container">
-        <Routes>
-          {/* Home Routes */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/home" element={<Navigate to="/" replace />} />
-
-          {/* Tabs Nested Routes */}
-          <Route path="tabs">
-            <Route index element={<TabsPage />} />
-            <Route path=":tabId" element={<TabsPage />} />
-          </Route>
-
-          {/* 404 Fallback */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </div>
-    </div>
-  </>
-);
+    </>
+  );
+};
