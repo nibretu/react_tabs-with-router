@@ -5,12 +5,13 @@ import './App.scss';
 import {
   Link,
   Navigate,
-  NavLink,
   Route,
   Routes,
+  useLocation,
   useParams,
 } from 'react-router-dom';
 
+import { Tabs } from './Tabs';
 import { Tab } from './types/Tab';
 
 const tabs: Tab[] = [
@@ -31,7 +32,12 @@ const tabs: Tab[] = [
   },
 ];
 
-export const Navigation = () => {
+const Navigation = () => {
+  const location = useLocation();
+
+  const isHomeActive = location.pathname === '/';
+  const isTabsActive = location.pathname.startsWith('/tabs');
+
   return (
     <nav
       className="navbar is-light is-fixed-top is-mobile has-shadow"
@@ -39,64 +45,42 @@ export const Navigation = () => {
     >
       <div className="container">
         <div className="navbar-brand">
-          <NavLink
+          <Link
             to="/"
-            className={({ isActive }) =>
-              `navbar-item ${isActive ? 'is-active' : ''}`
-            }
+            className={`navbar-item ${isHomeActive ? 'is-active' : ''}`}
           >
             Home
-          </NavLink>
+          </Link>
 
-          <NavLink
+          <Link
             to="/tabs"
-            className={({ isActive }) =>
-              `navbar-item ${isActive ? 'is-active' : ''}`
-            }
+            className={`navbar-item ${isTabsActive ? 'is-active' : ''}`}
           >
             Tabs
-          </NavLink>
+          </Link>
         </div>
       </div>
     </nav>
   );
 };
 
-export const HomePage = () => {
+const HomePage = () => {
   return <h1 className="title">Home page</h1>;
 };
 
-export const TabsPage = () => {
+const TabsPage = () => {
   const { tabId } = useParams();
-
-  const selectedTab = tabs.find(tab => tab.id === tabId);
 
   return (
     <>
       <h1 className="title">Tabs page</h1>
 
-      <div className="tabs is-boxed">
-        <ul>
-          {tabs.map(tab => (
-            <li
-              key={tab.id}
-              data-cy="Tab"
-              className={selectedTab?.id === tab.id ? 'is-active' : ''}
-            >
-              <Link to={`/tabs/${tab.id}`}>{tab.title}</Link>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="block" data-cy="TabContent">
-        {selectedTab ? selectedTab.content : 'Please select a tab'}
-      </div>
+      <Tabs tabs={tabs} selectedTabId={tabId} />
     </>
   );
 };
 
-export const NotFoundPage = () => {
+const NotFoundPage = () => {
   return <h1 className="title">Page not found</h1>;
 };
 
@@ -115,7 +99,7 @@ export const App = () => {
               <Route path=":tabId" element={<TabsPage />} />
             </Route>
 
-            <Route path="/home" element={<Navigate to="/" replace />} />
+            <Route path="home" element={<Navigate to="/" replace />} />
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
